@@ -39,7 +39,9 @@ def main() -> None:
         first, second = rule.split("|")
         rule_orders[first].add(second)
     
-    valid_updates = filter(lambda x: is_valid_update(update=x, rule_orders=rule_orders), updates)
+    check_valid = lambda x: sort_update(x, rule_orders) == x
+    
+    valid_updates = filter(check_valid, updates)
     print("Part 1:", sum(map(lambda x: int(x[len(x) // 2]), valid_updates)))
     
     # Part 2
