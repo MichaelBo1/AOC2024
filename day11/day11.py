@@ -1,7 +1,5 @@
 import sys
 from typing import Dict, List, Tuple
-from threading import Thread
-from functools import cache
 
 EXAMPLE = "125 17"
 MULTIPLIER = 2024
