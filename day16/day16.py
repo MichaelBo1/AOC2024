@@ -1,6 +1,6 @@
 import sys
-from typing import Dict, List, Set, Tuple, Deque
-from collections import deque
+from typing import Dict, List, Set, Tuple
+from collections import defaultdict
 from heapq import heappop, heappush
 
 EXAMPLE = """###############
@@ -64,7 +64,7 @@ def get_source_dest(grid: List[str]) -> Tuple[Tuple[int,int], Tuple[int,int]]:
 def is_valid(row: int, col: int, grid: List[str]) -> bool:
     return 0 <= row < len(grid) and 0 <= col < len(grid[0]) and grid[row][col] != "#"
 
-def shortest_path(grid: List[str], start: Tuple[int, int] , end: Tuple[int, int], print_path=True) -> int:
+def shortest_path(grid: List[str], start: Tuple[int, int] , end: Tuple[int, int]) -> Tuple[int,int]:
     start_row, start_col = start
     end_row, end_col = end
 
@@ -73,19 +73,10 @@ def shortest_path(grid: List[str], start: Tuple[int, int] , end: Tuple[int, int]
     distances: Dict[Tuple[int, int, str], int] = dict()
     distances[(start_row, start_col, 'E')] = 0
 
-    prev = dict()
+    predecessors: Dict[Tuple[int, int, str], List[Tuple[int, int, str]]] = defaultdict(list)
+
     while pq:
         cost, row, col, direction = heappop(pq)
-        
-        if (row, col) == (end_row, end_col):
-            path = []
-            current = (row, col, direction)
-            while current in prev:
-                path.append(current)
-                current = prev[current]
-            path.append((start_row, start_col, 'E'))
-            if (print_path): print(path[::-1])
-            return cost
         
         dr, dc = directions[direction]
         newr, newc = row + dr, col + dc
@@ -93,8 +84,10 @@ def shortest_path(grid: List[str], start: Tuple[int, int] , end: Tuple[int, int]
             new_cost = cost + MOVE_COST
             if (newr, newc, direction) not in distances or new_cost < distances[(newr, newc, direction)]:
                 distances[(newr, newc, direction)] = new_cost
-                prev[(newr, newc, direction)] = (row, col, direction)
+                predecessors[(newr, newc, direction)].append((row, col, direction))
                 heappush(pq, (new_cost, newr, newc, direction))
+            elif new_cost == distances[(newr, newc, direction)]:
+                        predecessors[(newr, newc, direction)].append((row, col, direction))
 
         for new_dir, (dr, dc) in directions.items():
             if new_dir != direction:
@@ -103,10 +96,28 @@ def shortest_path(grid: List[str], start: Tuple[int, int] , end: Tuple[int, int]
                     new_cost = cost + TURN_COST + MOVE_COST
                     if (newr, newc, new_dir) not in distances or new_cost < distances[(newr, newc, new_dir)]:
                         distances[(newr, newc, new_dir)] = new_cost
-                        prev[(newr, newc, new_dir)] = (row, col, direction)
+                        predecessors[(newr, newc, new_dir)].append((row, col, direction))
                         heappush(pq, (new_cost, newr, newc, new_dir))
-                
-    return 0
+                    elif new_cost == distances[(newr, newc, new_dir)]:
+                        predecessors[(newr, newc, new_dir)].append((row, col, direction))
+
+    goal_states = [(cost, row, col, dr) for (row, col, dr), cost in distances.items() if (row, col) == (end_row, end_col)]
+    min_cost = min(goal_states)[0]
+
+    unique_in_shortest: Set[Tuple[int, int]] = set()
+
+    def backtrack(current_state: Tuple[int, int, str]):
+        row, col, _ = current_state
+        unique_in_shortest.add((row, col))
+        for predecessor in predecessors.get(current_state, []):
+            backtrack(current_state=predecessor)
+
+    shortest_path_goals = [gs for gs in goal_states if gs[0] == min_cost]
+    for _, row, col, dr in shortest_path_goals:
+        backtrack(current_state=(row, col, dr))
+
+    tiles = len(unique_in_shortest)
+    return min_cost, tiles
 
 
 def main() -> None:
@@ -115,8 +126,10 @@ def main() -> None:
     else:
         raw = open(sys.argv[1], "r").read().splitlines()
     
-    # Part 1
-    src, end = get_source_dest(grid=raw)
-    print(shortest_path(grid=raw, start=src, end=end, print_path=False))
+    src, end = get_source_dest(grid=raw)    
+    path_len, positions = shortest_path(grid=raw, start=src, end=end)
+    print(f"Part 1: {path_len}")
+    print(f"Part 2: {positions}")
+
 if __name__ == "__main__":
     main()
