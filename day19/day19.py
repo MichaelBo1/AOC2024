@@ -1,21 +1,16 @@
-import re
 import sys
-from typing import List, Set
-from itertools import permutations
+from typing import Tuple
+from functools import cache
 
 parts = open(sys.argv[1], "r").read().split("\n\n")
-available_patterns = parts[0].split(", ")
+available_patterns = tuple(parts[0].split(", "))
 designs = parts[1].split("\n")
 
-print(available_patterns, designs)
+@cache
+def design_solutions(design: str, patterns: Tuple[str, ...]) -> int:
+    if design == "": return 1
+    return sum(design_solutions(design.removeprefix(p), patterns) for p in patterns if design.startswith(p))
 
-def can_be_made_from_substrings(target: str, substrings: List[str]) -> bool:
-    reg = re.compile("(?:" + "|".join(substrings) + ")*$")
-    if reg.match(target) != None:
-        return True
-    
-    return False
-
-                
-
-print(f"Part 1: {sum([can_be_made_from_substrings(design, available_patterns) for design in designs])}")
+            
+print(f"Part 1: {sum(1 for design in designs if design_solutions(design, available_patterns) > 0)}")
+print(f"Part 2: {sum(design_solutions(design, available_patterns) for design in designs if design_solutions(design, available_patterns) > 0)}")
