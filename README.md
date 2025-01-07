@@ -45,3 +45,7 @@ def solve(stone: int, iterations: int) -> int:
     return result
 ```
 To save on some computation, I also added memoization, which basically means saving computations as we go (in this case the resulting sum from expanding a given number for n iterations), so that we can quickly return a previously-computed result if we have already seen the computation before. In this case I used a simple global dictionary to store this, but Python does provde some nice function decorators like `@cache` which would do provide memoization automatically.
+#### Day 18
+Day 18 revolved around yet another grid traversal. The goal was to navigate from the top-left corner to the bottom-right, solving a shortest path problem. The main challenge was constructing the grid dynamically before solving it, ensuring all paths were considered.
+
+For Part 2, the task introduced a new twist: determining which coordinate, when modified, would render the bottom-right position unreachable. After some experimentation, I realized this could be optimized using a binary search approach over the remaining coordinates.
