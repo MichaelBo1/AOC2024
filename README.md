@@ -1,7 +1,7 @@
 ### Advent of Code 2024
 <img src="https://github.com/user-attachments/assets/125e07c1-5061-4e80-8f62-e93a41c2c95a" width=200 height=200 />
 
-> Solutions and brief explanations for [Advent of Code 2024](https://adventofcode.com/2024)
+> Solutions and brief explanations for [Advent of Code 2024](https://adventofcode.com/2024), still incomplete. Most solutions are in Python, but a few were written with TypeScript.
 #### Day 1
 Day 1's problem was solved nicely by parsing the input into two lists of integers. For this I made use of the `zip` functionality to pair and split corresponding numbers from each list.
 
